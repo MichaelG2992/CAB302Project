@@ -1,4 +1,4 @@
-package dataExercise;
+package server;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -7,6 +7,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+
+//Taken From Practical Week 7
+// Modified exception code
 
 public class DBConnection {
 
@@ -35,8 +38,14 @@ public class DBConnection {
          // get a connection
          instance = DriverManager.getConnection(url + "/" + schema, username,
                password);
+         //TESTING
+         System.out.println("Connected to database");
+
+      //Modified Error Messages
       } catch (SQLException sqle) {
          System.err.println(sqle);
+         System.out.println("Could not connect to database. Server shutdown");
+         System.exit(1);
       } catch (FileNotFoundException fnfe) {
          System.err.println(fnfe);
       } catch (IOException ex) {
