@@ -12,29 +12,50 @@ public class BillboardControlPanelUI extends JFrame implements ActionListener {
     private JTextField infoTextIN;
     private JLabel messageLabel;
     private JLabel infoLabel;
+    private JButton messageColourButton;
+    private JButton infoColourButton;
 
-    // Set up UI
-    public BillboardControlPanelUI(String title) throws ClassNotFoundException,
-            UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
-        super(title);
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.setContentPane(mainPanel);
+//    // Set up UI
+//    public BillboardControlPanelUI() throws ClassNotFoundException,
+//            UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+//        //super(title);
+//
+//        //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+////        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+////      this.setContentPane(mainPanel);
+////
+////       //exportButton.addActionListener(this::actionPerformed);
+////        ColourPicker messageCC = new ColourPicker(this);
+////        messageColourButton.addActionListener(messageCC);
+////        infoColourButton.addActionListener(messageCC);
+//
+//        //this.pack();
+//        //this.setVisible(true);
+//    }
 
-        exportButton.addActionListener(this::actionPerformed);
-        this.pack();
+    public static void billboardControlPanelUISwitch() throws
+            ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+//        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+//        frame = new BillboardControlPanelUI("Billboard Control Panel");
 
+        //exportButton.addActionListener(this::actionPerformed);
+        //ColourPicker messageCC = new ColourPicker(this);
+        //messageColourButton.addActionListener(messageCC);
+//        //infoColourButton.addActionListener(messageCC);
+//        frame.pack();
+//        frame.setVisible(true);
     }
 
     // Export when clicked
     @Override
     public void actionPerformed(ActionEvent export) {
+        // for testing. remove later
         System.out.println(export.getActionCommand());
         System.out.println(export.getSource());
         System.out.println(export.getWhen());
         Object source = export.getSource();
         if (source instanceof JButton) {
-            BillboardControlPanel.updateValuesXML(infoTextIN.getText(), messageTextIN.getText());
+            //BillboardControlPanel.updateValuesXML(infoTextIN.getText(), messageTextIN.getText());
             JButton button = (JButton) source;
             try {
                 BillboardControlPanel.exportXML();
@@ -45,5 +66,18 @@ public class BillboardControlPanelUI extends JFrame implements ActionListener {
             }
             //button.setText("CLICKED");
         }
+    }
+
+    public void createUIComponents() throws ClassNotFoundException,
+            UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+        // TODO: place custom component creation code here
+
+    }
+
+    public JPanel getPanel() throws ClassNotFoundException,
+            UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+        //new BillboardControlPanelUI();
+        //createUIComponents();
+        return mainPanel;
     }
 }

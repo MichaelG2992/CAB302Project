@@ -4,6 +4,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,10 +38,25 @@ public class BillboardControlPanel extends JFrame{
         private static String infoColour = "#00FFFF";
         private static String infoText = "Be sure to check out https://example.com/ for more information.";
 
-    public static void updateValuesXML(String info, String message){
-        infoText = info;
-        messageText = message;
+    public static void setInfoText(String text){
+        infoText = text;
     }
+    public static void setMessageText(String text){
+        messageText = text;
+    }
+    public static void setPictureUrl(String url){
+        pictureUrl = url;
+    }
+    public static void setMessageColour(String color){
+            messageColour = color;
+    }
+    public static void setInfoColour(String color){
+        infoColour = color;
+    }
+    public static void setBackgroundColour(String color){
+        backgroundColour = color;
+    }
+
     public static void exportXML() throws ParserConfigurationException, TransformerException{
 
             DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
@@ -100,9 +117,13 @@ public class BillboardControlPanel extends JFrame{
 
         public static void main(String argv[])  throws ClassNotFoundException,
            UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
-            JFrame frame = new BillboardControlPanelUI("Billboard Control Panel");
+            //LayoutCards.createAndShowGUI();
+            JFrame frame = new JFrame();
 
-            frame.setVisible(true);
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            MainMenuGUI mainMenu  = new MainMenuGUI("Main Menu", frame);
 
+            //frame.setContentPane(mainMenu);
+            //frame.setVisible(true);
         }
 }
