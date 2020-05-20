@@ -1,5 +1,6 @@
 package server;
 
+<<<<<<< HEAD
 import java.io.Serializable;
 
 public class Billboard implements Serializable {
@@ -25,4 +26,7 @@ public class Billboard implements Serializable {
     public void setName(String name){
         this.name = name;
     }
+=======
+public class Billboard {
+>>>>>>> 632431c908ad3996883cd5b5ce8cde82d338736f
 }
