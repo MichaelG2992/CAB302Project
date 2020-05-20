@@ -1,5 +1,9 @@
 # CAB302Project
-# Version 1 
+
+#Version 2
+-Implemented connection from viewer to server
+-Implemented LoginReply and LoginRequests
+# Version 1
 - Server connects to database
 - Database created on initial startup
 - A Client can connect to sever 
