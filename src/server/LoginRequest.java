@@ -14,7 +14,7 @@ public class LoginRequest extends Request {
 
 
 
-    public LoginRequest(String userName, String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public LoginRequest(String userName, String password){
         this.userName = userName;
         this.password = password;
         /*

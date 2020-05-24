@@ -1,4 +1,4 @@
 package server;
 
-public class BillboardRequest extends Request {
+public class UserRequest extends Request {
 }

@@ -3,6 +3,9 @@ package controlPanel;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import server.Billboard;
+import server.LoginReply;
+import server.LoginRequest;
 
 import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
@@ -13,7 +16,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
+import java.io.*;
+import java.net.Socket;
+import java.util.Properties;
 
 public class BillboardControlPanel extends JFrame{
 
@@ -35,6 +40,8 @@ public class BillboardControlPanel extends JFrame{
                 "Y+8SrLVPbTmFQ1iRvw3AAAAAElFTkSuQmCC";
         private static String infoColour = "#00FFFF";
         private static String infoText = "Be sure to check out https://example.com/ for more information.";
+        private static String usernameText;
+        public static String passwordText;
 
     public static void setInfoText(String text){
         infoText = text;
@@ -54,8 +61,37 @@ public class BillboardControlPanel extends JFrame{
     public static void setBackgroundColour(String color){
         backgroundColour = color;
     }
+    public static void setLogInText(String userName,String password){
+        usernameText = userName;
+        passwordText = password;
+    }
+    public static void setBillboardName(String name){
+        billboardName= name;
 
-    public static void exportXML() throws ParserConfigurationException, TransformerException{
+    };
+
+
+
+    //Network components
+    private static Socket socket = null;
+    private static ObjectOutputStream objectOutputStream = null;
+    private static ObjectInputStream objectInputStream = null;
+    private static int port;
+    private static String host;
+
+    //Current User Properties
+    private static String creator;
+    private static String sessionToken;
+    private static String permissions;
+
+    //Creation of Billboard Data
+    private static String billboardName;
+
+
+
+    public static void exportXML() throws ParserConfigurationException, TransformerException {
+        //Check for appropriate permissions
+        if (permissions.contains("Create Billboards")) {
 
             DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 
@@ -70,7 +106,7 @@ public class BillboardControlPanel extends JFrame{
             root.setAttributeNode(backgroundColourAttr);
             backgroundColourAttr.setValue(backgroundColour);
             // Message element
-            Element message= document.createElement("message");
+            Element message = document.createElement("message");
 
             root.appendChild(message);
 
@@ -101,26 +137,159 @@ public class BillboardControlPanel extends JFrame{
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource domSource = new DOMSource(document);
-            StreamResult streamResult = new StreamResult(new File(xmlFilePath));
+            //StreamResult streamResult = new StreamResult(new File(xmlFilePath));
+            // StreamResult streamResult = new StreamResult(new StringWriter());
+            StringWriter stringWriter = new StringWriter();
 
 
             // For Debugging
-            // StreamResult streamResult = new StreamResult(System.out);
+            //streamResult = new StreamResult(System.out);
+            transformer.transform(domSource, new StreamResult(stringWriter));
 
-
-            transformer.transform(domSource, streamResult);
-
+            //Convert dom source to XML string
+            String file = stringWriter.getBuffer().toString();
+            System.out.println("PRINT XML\n" + file);
             System.out.println("Done creating XML File");
+
+            //Create Billboard Object
+            Billboard billboard = new Billboard();
+            billboard.setName(billboardName);
+            billboard.setFile(file);
+            billboard.setSessionToken(sessionToken);
+            billboard.setCreator(creator);
+
+
+            //Send Billboard to server
+            try {
+                //Establish  Connection
+                clientConnection();
+                objectOutputStream.writeObject(billboard);
+                objectOutputStream.close();
+                socket.close();
+                System.out.println("SENT BILLBOARD TO SERVER");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        }//Invalid permissions
+        else{
+            System.out.println("You do not have the required permissions");
         }
 
-        public static void main(String argv[])  throws ClassNotFoundException,
-           UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+    }
+
+    /**
+     *
+     */
+        //Check for connection to server
+        public static boolean serverConnection() throws IOException {
+            boolean connection = false;
+            Properties networkProps = new Properties();
+            FileInputStream in = null;
+
+            try {
+                in = new FileInputStream("./network.props");
+                networkProps.load((in));
+                in.close();
+
+                //Get data source from network properties
+                port = Integer.parseInt(networkProps.getProperty("port"));
+                host = networkProps.getProperty("host.name");
+
+                //Set up connection to server
+                socket = new Socket(host, port);
+                objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+                objectInputStream = new ObjectInputStream(socket.getInputStream());
+
+
+                //Display Server Connection
+                System.out.println(String.format("Client connected to host: %s at port: %d", host, port));
+                connection = true;
+
+            }// If no connection to server
+            catch (IOException | NumberFormatException e) {
+                return connection;
+            }
+            objectOutputStream.close();
+            objectInputStream.close();
+            socket.close();
+
+            return connection;
+
+        }
+
+
+        //Log in authentication
+        public static boolean logIn(String usernameText, String passwordText) {
+            boolean loggedIn = false;
+
+            if ( socket.isClosed()){
+                try {
+                    clientConnection();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                //Send Login request to server
+                LoginRequest loginRequest = new LoginRequest(usernameText,passwordText);
+                objectOutputStream.writeObject(loginRequest);
+                objectOutputStream.flush();
+
+                Object o = objectInputStream.readObject();
+
+                if (o instanceof LoginReply) {
+                    LoginReply loginReply = (LoginReply) o;
+                    //If log in successful
+                    //Set current session token and permissions
+                    if (loginReply.getLoginSuccessful()) {
+                        System.out.println(String.format("Logged in as: %s with Session token %s and permissions: %s", loginReply.getUserName(),
+                                loginReply.getSessionToken(), loginReply.getPermissions()));
+                        sessionToken = loginReply.getSessionToken();
+                        permissions = loginReply.getPermissions();
+                        creator = loginReply.getUserName();
+                        loggedIn = true;
+                    } else {
+                        loggedIn = false;
+                    }
+                    objectOutputStream.close();
+                    objectInputStream.close();
+                    socket.close();
+                }
+
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("CLOSED SOCKET LOG IN");
+            }
+            return loggedIn;
+        }
+
+        //Open new connection to server from client
+        public static void clientConnection() throws IOException {
+                socket = new Socket(host,port);
+                objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+                objectInputStream = new ObjectInputStream(socket.getInputStream());
+
+        }
+
+
+
+        public static void main(String argv[]) throws ClassNotFoundException,
+                UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException, IOException {
             //LayoutCards.createAndShowGUI();
-            JFrame frame = new JFrame();
 
-            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            MainMenuGUI mainMenu  = new MainMenuGUI("Main Menu", frame);
-
+            //Set up connection to server
+            if (serverConnection()) {
+                    JFrame frame = new JFrame();
+                    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                    MainMenuGUI mainMenu = new MainMenuGUI("Main Menu", frame);
+                }
+            //Display Error message
+            else{
+                JFrame frame = new JFrame();
+                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                ServerDownMessage serverError  = new ServerDownMessage("Error", frame);
+            }
             //frame.setContentPane(mainMenu);
             //frame.setVisible(true);
         }

@@ -1,11 +1,14 @@
 package server;
 
-<<<<<<< HEAD
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Billboard implements Serializable {
 
     private String name;
+    private String xmlFile;
+    private String creator;
+    private String sessionToken;
 
     /**
      *
@@ -26,7 +29,18 @@ public class Billboard implements Serializable {
     public void setName(String name){
         this.name = name;
     }
-=======
-public class Billboard {
->>>>>>> 632431c908ad3996883cd5b5ce8cde82d338736f
+
+    public void setFile(String file){this.xmlFile = file;}
+
+    public String getFile(){return xmlFile;}
+
+    public void setCreator(String creator){this.creator = creator;}
+
+    public String getCreator(){return creator;}
+
+    public void setSessionToken(String sessionToken){this.sessionToken = sessionToken;}
+
+    public String getSessionToken(){return sessionToken;}
+
+
 }

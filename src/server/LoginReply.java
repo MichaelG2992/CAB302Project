@@ -7,10 +7,11 @@ import java.util.Random;
 
 public class LoginReply implements Serializable {
     private String userName;
-    private boolean loginSuccessful;
+    private boolean loginSuccessful = false;
     private String sessionToken;
+    private String permissions;
 
-    public LoginReply() throws NoSuchAlgorithmException {
+    public LoginReply()  {
     }
 
     public boolean getLoginSuccessful(){
@@ -25,15 +26,29 @@ public class LoginReply implements Serializable {
          this.sessionToken = sessionToken ;
     }
 
-    public void loginSuccessful(boolean loginSuccessful){
+    public void setLoginSuccessful(boolean loginSuccessful){
         this.loginSuccessful = loginSuccessful ;
     }
 
+    public void setUserName(String userName){this.userName=userName;}
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setPermissions(String permissions) {
+        this.permissions = permissions;
+    }
+
+    public String getPermissions() {
+        return permissions;
+    }
 
     /**
      * @return
      */
     // From Week 9 Assignment Q/A
+    //Creates random session token
     public static  String createSessionToken(){
         Random random = new Random();
         byte[] randomBytes = new byte[32];

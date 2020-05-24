@@ -1,4 +1,6 @@
 package server;
 
-public class ListBillboardsRequest {
+import java.io.Serializable;
+
+public class ListBillboardsRequest implements Serializable {
 }
