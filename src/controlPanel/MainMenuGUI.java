@@ -157,7 +157,7 @@ public class MainMenuGUI extends JFrame implements ActionListener {
             //Check for empty text fields
             if (!userName.isEmpty() && !password.isEmpty()){
                 // if successful
-                if (BillboardControlPanel.logIn("superUser","password") ){
+                if (BillboardControlPanel.logIn(userName,password) ){
                     layout.show(cardLayout, "BillboardCreator");
                     setSize(500,250);
                     JOptionPane.showMessageDialog(this,"Logged in successfully. Welcome to Billboard Manager",
