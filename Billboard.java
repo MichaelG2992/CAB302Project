@@ -25,15 +25,22 @@ public class Billboard {
     private String pictureData;
     private String infoColour;
     private String infoText;
+    private String creator;
+
+    // Should be editable in GUI
+    public String xmlFilePath;
 
     // Default empty constructor
     public Billboard(){
 
     }
 
+    public Billboard(String username){
+        creator = username;
+    }
     // Constructor with all values
     public Billboard(String nameText, String backgroundColourText, String message, String messageColourText,
-                     String pictureUrlText, String info, String infoColourText){
+                     String pictureUrlText, String info, String infoColourText, String username){
         name = nameText;
         backgroundColour = backgroundColourText;
         messageText = message;
@@ -41,9 +48,11 @@ public class Billboard {
         pictureUrl = pictureUrlText;
         infoColour = infoColourText;
         infoText = info;
+        creator = username;
     }
 
     //Setters
+    public void setCreator(String text){creator = text;}
     public void setName(String text){name = text;}
     public void setInfoText(String text){infoText = text;}
     public void setMessageText(String text){messageText = text;}
@@ -51,8 +60,10 @@ public class Billboard {
     public void setMessageColour(String colour){messageColour = colour;}
     public void setInfoColour(String colour){infoColour = colour;}
     public void setBackgroundColour(String colour){backgroundColour = colour;}
+    public void setXmlFilePath(String path){xmlFilePath = path;}
 
     //Getters
+    public String getCreator(){return creator;}
     public String getName(){return name;}
     public String getInfoText(){return infoText;}
     public String getMessageText(){return messageText;}
@@ -60,11 +71,10 @@ public class Billboard {
     public String getMessageColour(){return messageColour;}
     public String getInfoColour(){return infoColour;}
     public String getBackgroundColour(){return backgroundColour;}
+    public String getXmlFilePath(){return xmlFilePath;}
 
-    // Should be editable in GUI
-    public static final String xmlFilePath = "C:\\Users\\kathr\\Desktop\\";
-
-    public static Billboard importXML(String importFile) throws ParserConfigurationException, IOException, SAXException {
+    public static Billboard importXML(String importFile) throws ParserConfigurationException,
+            IOException, SAXException {
         File file = new File(importFile);
         DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 
@@ -74,7 +84,9 @@ public class Billboard {
         Billboard importedBillboard = new Billboard();
 
         // Get values from XML
-        importedBillboard.setName(importFile);
+        String name = importFile.substring(importFile.lastIndexOf('\\') + 1);
+        name = name.substring(0, name.length() - 4);
+        importedBillboard.setName(name);
         // Get background colour
         NodeList billboardNodes = document.getElementsByTagName("billboard");
         Node billboard = billboardNodes.item(0);
@@ -165,7 +177,7 @@ public class Billboard {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource domSource = new DOMSource(document);
-        StreamResult streamResult = new StreamResult(new File(xmlFilePath + name + ".xml"));
+        StreamResult streamResult = new StreamResult(new File(xmlFilePath + ".xml"));
 
         // For Debugging
         // StreamResult streamResult = new StreamResult(System.out);
@@ -176,6 +188,6 @@ public class Billboard {
 
     @Override
     public String toString() {
-        return this.name;
+        return this.name + "                    Creator: " + this.creator;
     }
 }

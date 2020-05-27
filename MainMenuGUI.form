@@ -232,6 +232,140 @@
               </grid>
             </children>
           </grid>
+          <grid id="80045" binding="schedulePanel" layout-manager="CardLayout" hgap="0" vgap="0">
+            <constraints>
+              <card name="ScheduleEditor"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="85e2a" class="javax.swing.JTable" binding="table1" default-binding="true">
+                <constraints>
+                  <card name="Card1"/>
+                </constraints>
+                <properties>
+                  <autoCreateRowSorter value="false"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="19255" binding="editUsersPanel" layout-manager="CardLayout" hgap="0" vgap="0">
+            <constraints>
+              <card name="EditUsers"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <grid id="842fb" binding="userListPanel" layout-manager="CardLayout" hgap="0" vgap="0">
+                <constraints>
+                  <card name="Card1"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children/>
+              </grid>
+            </children>
+          </grid>
+          <grid id="81cb" binding="userInfoPanel" layout-manager="CardLayout" hgap="0" vgap="0">
+            <constraints>
+              <card name="UserInfo"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <grid id="193b" layout-manager="CardLayout" hgap="0" vgap="0">
+                <constraints>
+                  <card name="Card1"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <grid id="797ab" layout-manager="GridLayoutManager" row-count="4" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <card name="Card1"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="e5963" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Username:"/>
+                        </properties>
+                      </component>
+                      <component id="f013e" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Permissions:"/>
+                        </properties>
+                      </component>
+                      <component id="d07fc" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Password"/>
+                        </properties>
+                      </component>
+                      <component id="a88d" class="javax.swing.JButton" binding="deleteUserButton" default-binding="true">
+                        <constraints>
+                          <grid row="3" column="0" row-span="1" col-span="6" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Delete User"/>
+                        </properties>
+                      </component>
+                      <component id="35778" class="javax.swing.JLabel" binding="levelLabel">
+                        <constraints>
+                          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Level"/>
+                        </properties>
+                      </component>
+                      <component id="761df" class="javax.swing.JLabel" binding="passwordLabel">
+                        <constraints>
+                          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="PasswordLabel"/>
+                        </properties>
+                      </component>
+                      <component id="bc4f4" class="javax.swing.JLabel" binding="nameLabel">
+                        <constraints>
+                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Name"/>
+                        </properties>
+                      </component>
+                      <component id="6f7aa" class="javax.swing.JButton" binding="editPermissionsButton" default-binding="true">
+                        <constraints>
+                          <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Edit Permissions"/>
+                        </properties>
+                      </component>
+                      <component id="8d105" class="javax.swing.JButton" binding="changePasswordButton" default-binding="true">
+                        <constraints>
+                          <grid row="2" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Change Password"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                </children>
+              </grid>
+            </children>
+          </grid>
         </children>
       </grid>
       <component id="b7bc" class="javax.swing.JButton" binding="editButton" default-binding="true">
