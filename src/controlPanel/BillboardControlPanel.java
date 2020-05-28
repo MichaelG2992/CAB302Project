@@ -1,9 +1,11 @@
 package controlPanel;
 
+import com.sun.tools.javac.Main;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import server.Billboard;
+import server.GeneralMessageResponse;
 import server.LoginReply;
 import server.LoginRequest;
 
@@ -20,56 +22,31 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Properties;
 
-public class BillboardControlPanel extends JFrame{
+public class BillboardControlPanel extends JFrame {
 
     // Should be editable in GUI
-        public static final String xmlFilePath = "C:\\Users\\Michael\\Desktop\\testBillboard.xml";
+    public static final String xmlFilePath = "C:\\Users\\Michael\\Desktop\\testBillboard.xml";
 
-        // Default values for testing
-        private static String backgroundColour = "#0000FF";
-        private static String messageColour = "##FFFF0";
-        private static String messageText = "Welcome to the ____ Corporation's Annual Fundraiser!";
-        private static String pictureUrl = "https://example.com/" +
-                "fundraiser_image.jpg";
-        private static String pictureData= "iVBORw0KGgoAAA" +
-                "ANSUhEUgAAAAgAAAAICAIAAABLbSncAAAALHRFWHRDcm" +
-                "VhdGlvbiBUaW1lAE1vbiAxNiBNYXIgMjAyMCAxMDowNTo0N" +
-                "yArMTAwMNQXthkAAAAHdElNRQfkAxAABh+N6nQIAAAACXBIWX" +
-                "MAAAsSAAALEgHS3X78AAAABGdBTUEAALGPC/xhBQAAADVJREFUeNp" +
-                "1jkEKADAIwxr//+duIIhumJMUNUWSbU2AyPROFeVqaIH/T7JeRBd0D" +
-                "Y+8SrLVPbTmFQ1iRvw3AAAAAElFTkSuQmCC";
-        private static String infoColour = "#00FFFF";
-        private static String infoText = "Be sure to check out https://example.com/ for more information.";
-        private static String usernameText;
-        public static String passwordText;
+    // Default values for testing
+    private static String backgroundColour = "#0000FF";
+    private static String messageColour = "##FFFF0";
+    private static String messageText = "Welcome to the ____ Corporation's Annual Fundraiser!";
+    private static String pictureUrl = "https://example.com/" +
+            "fundraiser_image.jpg";
+    private static String pictureData = "iVBORw0KGgoAAA" +
+            "ANSUhEUgAAAAgAAAAICAIAAABLbSncAAAALHRFWHRDcm" +
+            "VhdGlvbiBUaW1lAE1vbiAxNiBNYXIgMjAyMCAxMDowNTo0N" +
+            "yArMTAwMNQXthkAAAAHdElNRQfkAxAABh+N6nQIAAAACXBIWX" +
+            "MAAAsSAAALEgHS3X78AAAABGdBTUEAALGPC/xhBQAAADVJREFUeNp" +
+            "1jkEKADAIwxr//+duIIhumJMUNUWSbU2AyPROFeVqaIH/T7JeRBd0D" +
+            "Y+8SrLVPbTmFQ1iRvw3AAAAAElFTkSuQmCC";
+    private static String infoColour = "#00FFFF";
+    private static String infoText = "Be sure to check out https://example.com/ for more information.";
 
-    public static void setInfoText(String text){
-        infoText = text;
-    }
-    public static void setMessageText(String text){
-        messageText = text;
-    }
-    public static void setPictureUrl(String url){
-        pictureUrl = url;
-    }
-    public static void setMessageColour(String color){
-            messageColour = color;
-    }
-    public static void setInfoColour(String color){
-        infoColour = color;
-    }
-    public static void setBackgroundColour(String color){
-        backgroundColour = color;
-    }
-    public static void setLogInText(String userName,String password){
-        usernameText = userName;
-        passwordText = password;
-    }
-    public static void setBillboardName(String name){
-        billboardName= name;
 
-    };
-
+    public static void setMessageColour(String color) {
+        messageColour = color;
+    }
 
 
     //Network components
@@ -84,12 +61,12 @@ public class BillboardControlPanel extends JFrame{
     private static String sessionToken;
     private static String permissions;
 
-    //Creation of Billboard Data
-    private static String billboardName;
 
 
+    public static boolean exportXML(Billboard billboard) throws ParserConfigurationException, TransformerException {
 
-    public static void exportXML() throws ParserConfigurationException, TransformerException {
+        boolean exportSuccess = false;
+
         //Check for appropriate permissions
         if (permissions.contains("Create Billboards")) {
 
@@ -148,35 +125,48 @@ public class BillboardControlPanel extends JFrame{
 
             //Convert dom source to XML string
             String file = stringWriter.getBuffer().toString();
-            System.out.println("PRINT XML\n" + file);
-            System.out.println("Done creating XML File");
-
-            //Create Billboard Object
-            Billboard billboard = new Billboard();
-            billboard.setName(billboardName);
-            billboard.setFile(file);
-            billboard.setSessionToken(sessionToken);
-            billboard.setCreator(creator);
 
 
             //Send Billboard to server
             try {
+                //Set session token to request
+                billboard.setSessionToken(sessionToken);
+                //Set Creator to billboard
+                billboard.setCreator(creator);
                 //Establish  Connection
                 clientConnection();
                 objectOutputStream.writeObject(billboard);
-                objectOutputStream.close();
-                socket.close();
-                System.out.println("SENT BILLBOARD TO SERVER");
+                objectOutputStream.flush();
+
+                //Read Response Message
+                Object o = objectInputStream.readObject();
+
+                //If Unsuccessful Message received from server due to invalid session
+                if (o instanceof GeneralMessageResponse) {
+                    GeneralMessageResponse generalMessageResponse = (GeneralMessageResponse) o;
+                    String responseMessage = generalMessageResponse.getMessage();
+                    JOptionPane.showMessageDialog(null, responseMessage,
+                            "Error", JOptionPane.OK_OPTION);
+                    exportSuccess = false;
+
+                } else {
+                    exportSuccess = true;
+                }
+
+            //No unsuccessful message received from server
             } catch (IOException e) {
+                exportSuccess = true;
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
 
 
-        }//Invalid permissions
-        else{
-            System.out.println("You do not have the required permissions");
+        }//Invalid permissions to create billboard
+        else {
+            JOptionPane.showMessageDialog(null, "You do not have the required permission: CREATE BILLBOARDS",
+                    "Error", JOptionPane.OK_OPTION);
         }
-
+        return exportSuccess;
     }
 
     /**
@@ -233,7 +223,7 @@ public class BillboardControlPanel extends JFrame{
             }
             try {
                 //Send Login request to server
-                LoginRequest loginRequest = new LoginRequest(usernameText,passwordText);
+                LoginRequest loginRequest = new LoginRequest("superUser","password");
                 objectOutputStream.writeObject(loginRequest);
                 objectOutputStream.flush();
 

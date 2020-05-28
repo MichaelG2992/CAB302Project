@@ -17,7 +17,7 @@ public class ServerDownMessage extends JFrame {
         this.setContentPane(mainPanel);
         UIManager.put("OptionPane.minimumSize",new Dimension(250,100));
 
-        JOptionPane.showMessageDialog(this,"Connection to Server failed. Server  down or incorrect network properties used." +
+        JOptionPane.showMessageDialog(this,"Connection to Server failed. Server down or incorrect network properties used." +
                         " Please exit and try again.",
                 "Error",JOptionPane.ERROR_MESSAGE);
         System.exit(1);

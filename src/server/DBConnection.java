@@ -1,5 +1,8 @@
 package server;
 
+import controlPanel.ServerDownMessage;
+
+import javax.swing.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -44,7 +47,19 @@ public class DBConnection {
       //Modified Error Messages
       } catch (SQLException sqle) {
          System.err.println(sqle);
-         System.out.println("Could not connect to database. Server shutdown");
+         JFrame frame = new JFrame();
+         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+         try {
+            DatabaseDownMessage serverError = new DatabaseDownMessage("Error", frame);
+         } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+         } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+         } catch (InstantiationException e) {
+            e.printStackTrace();
+         } catch (IllegalAccessException e) {
+            e.printStackTrace();
+         }
          System.exit(1);
       } catch (FileNotFoundException fnfe) {
          System.err.println(fnfe);

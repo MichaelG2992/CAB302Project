@@ -11,6 +11,12 @@ public class User  implements Serializable {
     public User(){
     }
 
+    public User(String name, String level){
+        username = name;
+        permissions = level;
+    }
+
+
 
     public String getUserName(){return username;}
 

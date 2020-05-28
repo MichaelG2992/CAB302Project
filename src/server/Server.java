@@ -23,7 +23,8 @@ public class Server {
      */
 
     //User and SessionTokens
-     private static HashMap<String,String> users = new HashMap<String,String>();
+    private static HashMap<String, String> users = new HashMap<String, String>();
+    public ObjectInputStream objectInputStream = null;
 
 
     public static void main(String[] args) throws IOException, SQLException, ClassNotFoundException, NoSuchAlgorithmException {
@@ -31,7 +32,7 @@ public class Server {
         Properties networkProps = new Properties();
         FileInputStream in = null;
         ServerSocket serverSocket = null;
-        try{
+        try {
             in = new FileInputStream("./network.props");
             networkProps.load((in));
             in.close();
@@ -43,16 +44,17 @@ public class Server {
             serverSocket = new ServerSocket(port);
 
             //Display Server Connection
-            System.out.println(String.format("Server set up at port: %d",port));
+            System.out.println(String.format("Server set up at port: %d", port));
 
         } catch (IOException | NumberFormatException e) {
-        e.printStackTrace();
-    }
+            e.printStackTrace();
+        }
 
         //Create tables if not exist
         DatabaseDataSource dataSource = new DatabaseDataSource();
         dataSource.DatabaseStartUp();
-        for(;;) {
+
+        for (; ; ) {
 
             Socket socket = serverSocket.accept();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream((socket.getOutputStream()));
@@ -100,13 +102,17 @@ public class Server {
                         Billboard billboard = (Billboard) o;
 
                         //Check for valid sessiontoken
+                        System.out.println(billboard.getSessionToken());
                         if (users.containsValue(billboard.getSessionToken())) {
                             //Create billboard and add to database
                             DatabaseDataSource createData = new DatabaseDataSource();
                             createData.createBillboard(billboard);
-                            System.out.println(String.format("Added Name: %s and File: %s to the database", billboard.getName(), billboard.getFile()));
+                            System.out.println(String.format("Added Name: %s to the database", billboard.getName()));
                         } else {
-                            System.out.println("Not a Valid Session token");
+                            System.out.println("SENT MESSAGE");
+                            GeneralMessageResponse generalMessageResponse = new GeneralMessageResponse("Not a vaild Session Token. Please Log In to continue.");
+                            objectOutputStream.writeObject(generalMessageResponse);
+
                         }
                         break;
 
@@ -117,6 +123,7 @@ public class Server {
                         DatabaseDataSource listData = new DatabaseDataSource();
                         ArrayList<Billboard> listBillboards = listData.getBillboards();
                         objectOutputStream.writeObject(listBillboards);
+                        break;
 
                         //List Users Request
                     case 4:
@@ -128,17 +135,23 @@ public class Server {
 
                     default:
                         objectOutputStream.writeObject(null);
+
                 }
             }// If no connection to server
             catch (IOException e) {
-                System.out.println("Empty request");
                 continue;
             }
-            objectOutputStream.flush();
-            objectInputStream.close();
-            objectOutputStream.close();
-            socket.close();
+
+                objectInputStream.close();
+                objectOutputStream.flush();
+                objectOutputStream.close();
+                socket.close();
+
+
+            }
+
+
+
         }
-    }
 }
 

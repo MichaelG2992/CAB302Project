@@ -1,5 +1,6 @@
 package server;
 
+import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,8 +16,8 @@ public class DatabaseDataSource {
     public static final String CREATE_TABLE2 =
             "CREATE TABLE IF NOT EXISTS billboards ( "
                     + "name VARCHAR(255) PRIMARY KEY NOT NULL UNIQUE,"
-                    + "creator VARCHAR(255) NOT NULL UNIQUE,"
-                    + "file MEDIUMTEXT" + ");";
+                    + "creator VARCHAR(255) NOT NULL,"
+                    + "file BLOB" + ");";
     public static final String CREATE_TABLE3 =
             "CREATE TABLE IF NOT EXISTS scheduling ( "
                     + "name VARCHAR(255) PRIMARY KEY NOT NULL UNIQUE,"
@@ -53,34 +54,36 @@ public class DatabaseDataSource {
 
         statement.close();
         // connection.close();
-        // System.out.println(connection.isClosed());
     }
 
     /**
      * @return
      * @throws SQLException
      */
-    public ArrayList<Billboard> getBillboards() throws SQLException {
+    public ArrayList<Billboard> getBillboards() throws SQLException, IOException, ClassNotFoundException {
         Connection connection = DBConnection.getInstance();
-        //System.out.println(connection.isClosed());
-
         Statement statement = connection.createStatement();
+
         ResultSet resultSet = statement.executeQuery(("SELECT * FROM billboards"));
         ArrayList<Billboard> billboardList = new ArrayList<Billboard>();
+
         while (resultSet.next()){
             String name = (resultSet.getString(1));
-            String file = (resultSet.getString(2));
-            String creator = (resultSet.getString(3));
-            Billboard billboard = new Billboard();
-            billboard.setName(name);
-            billboard.setFile(file);
-            billboard.setCreator(creator);
+            String creator = (resultSet.getString(2));
+
+            //De-serialize Billboard
+            byte [] o = resultSet.getBytes(3);
+            Billboard billboard = byteToObject(o);
+
+            //Add Billboard to list
             billboardList.add(billboard);
+
         }
+
         resultSet.close();
         statement.close();
         //connection.close();
-        //return billboard;
+
         return billboardList;
     }
 
@@ -136,9 +139,10 @@ public class DatabaseDataSource {
     public LoginReply loginSuccessful(LoginRequest request) throws SQLException, NoSuchAlgorithmException {
         Connection connection = DBConnection.getInstance();
         Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery((String.format("SELECT password, permissions FROM users WHERE username = '%s'",
+        ResultSet resultSet = statement.executeQuery((String.format("SELECT password, permissions FROM users WHERE BINARY username = '%s'",
                 request.getUserName())));
         LoginReply loginReply = new LoginReply();
+
 
         //Check for database results
         if (resultSet.next() != false) {
@@ -179,16 +183,57 @@ public class DatabaseDataSource {
      * @throws SQLException
      */
     //Insert billboard into database
-    public void createBillboard(Billboard billboard) throws SQLException {
+    public void createBillboard(Billboard billboard) throws SQLException, IOException {
+
+        final String ADD_BILLBOARD = "REPLACE INTO billboards(name, creator, file ) VALUES (?, ? , ?)";
+
         Connection connection = DBConnection.getInstance();
-        Statement statement = connection.createStatement();
-        statement.executeQuery(String.format("INSERT INTO billboards(name,file,creator) VALUES('%s','%s','%s')",billboard.getName(), billboard.getFile(),billboard.getCreator()));
+        PreparedStatement statement = connection.prepareStatement(ADD_BILLBOARD);
+
+        statement.setString(1,billboard.getName());
+        statement.setString(2, billboard.getCreator());
+        //Serialize billboard object
+        byte [] data = objectToByte(billboard);
+        statement.setBytes(3,data);
+
+        statement.executeUpdate();
         statement.close();
         //connection.close();
     }
 
+    //Implementation used from http://www.easywayserver.com/java/save-serializable-object-in-java/
+    private  byte[] objectToByte(Object o) throws IOException {
+        //Convert Billboard to bytes
+        ByteArrayOutputStream byteArrayOutputStream= new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        objectOutputStream.writeObject(o);
+
+        objectOutputStream.flush();
+        objectOutputStream.close();
+        byteArrayOutputStream.close();
+
+        return byteArrayOutputStream.toByteArray();
+
+    }
+
+    //Implementation used from http://www.easywayserver.com/java/save-serializable-object-in-java/
+    private  Billboard byteToObject(byte [] bytes ) throws IOException, ClassNotFoundException {
+        //Convert bytes to Billboard object
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+        ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+
+        Object o = objectInputStream.readObject();
+        Billboard billboard = (Billboard) o;
+        objectInputStream.close();
+        byteArrayInputStream.close();
+
+        return billboard;
 
 
 
+
+
+
+    }
 
 }

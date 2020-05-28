@@ -1,5 +1,7 @@
 package controlPanel;
 
+import server.Billboard;
+
 import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -60,8 +62,9 @@ public class BillboardControlPanelUI extends JFrame implements ActionListener {
         if (source instanceof JButton) {
             //BillboardControlPanel.updateValuesXML(infoTextIN.getText(), messageTextIN.getText());
             JButton button = (JButton) source;
+            Billboard billboard = new Billboard();
             try {
-                BillboardControlPanel.exportXML();
+                BillboardControlPanel.exportXML(billboard);
             } catch (ParserConfigurationException e) {
                 e.printStackTrace();
             } catch (TransformerException e) {

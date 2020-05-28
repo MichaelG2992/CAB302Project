@@ -32,12 +32,12 @@ public class ClientTest {
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
 
             //TESTING REQUESTS
-            //BillboardRequest billboardRequest = new BillboardRequest();
-            //objectOutputStream.writeObject(billboardRequest);
+            ListBillboardsRequest billboardRequest = new ListBillboardsRequest();
+            objectOutputStream.writeObject(billboardRequest);
             //LoginRequest loginRequest = new LoginRequest("superUser","password");
             //ListBillboardsRequest listBillboardsRequest = new ListBillboardsRequest();
-            UserRequest userRequest = new UserRequest();
-            objectOutputStream.writeObject(userRequest);
+            //erRequest userRequest = new UserRequest();
+           //bjectOutputStream.writeObject(userRequest);
             objectOutputStream.flush();
 
 
@@ -45,7 +45,7 @@ public class ClientTest {
             Object o = objectInputStream.readObject();
 
 
-            if (o instanceof Billboard){
+            if (o instanceof ListBillboardsRequest){
                 Billboard billboard = (Billboard) o;
                 System.out.println(" Billboard Name is : " + billboard.getName());
             }
@@ -61,11 +61,15 @@ public class ClientTest {
 
             else if (o.toString().contains("Billboard")){
                 ArrayList<Billboard> list = (ArrayList<Billboard>) o;
+                int count = 0;
                 for (Billboard billboard : list) {
                     System.out.println("Billboard Name:" + billboard.getName());
-                    System.out.println("XML File:" + billboard.getFile());
                     System.out.println("Creator:" + billboard.getCreator());
+                    count ++;
+
+
                 }
+                System.out.println(count);
             }
 
             else if (o.toString().contains("User")){
