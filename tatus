@@ -1,0 +1,33 @@
+[33mcommit 632431c908ad3996883cd5b5ce8cde82d338736f[m[33m ([m[1;36mHEAD -> [m[1;32m8890463[m[33m, [m[1;31morigin/8890463[m[33m)[m
+Author: MichaelG2992 <56423234+MichaelG2992@users.noreply.github.com>
+Date:   Wed May 20 21:08:34 2020 +1000
+
+    Update README.md
+
+[33mcommit 2d93d8d792464419a486ac04bdfeeaffeba83057[m
+Author: Michael Gourlay <michael.gourlay@hotmail.com>
+Date:   Wed May 20 21:06:33 2020 +1000
+
+    Implemented connection from viewer to server
+    Implemented LoginReply and LoginRequests
+
+[33mcommit 99e518b8b8a318921cf9b0c7324bf9665a1fef4c[m[33m ([m[1;32mmaster[m[33m)[m
+Author: Michael Gourlay <michael.gourlay@hotmail.com>
+Date:   Fri May 15 18:13:48 2020 +1000
+
+     Version 1
+    - Server connects to database
+    - Database created on initial startup
+    - A Client can connect to sever
+
+[33mcommit dc175947107fbe62f8f136b704dd991a7d5a4b77[m
+Author: Michael Gourlay <michael.gourlay@hotmail.com>
+Date:   Fri May 15 18:05:20 2020 +1000
+
+    Version1
+
+[33mcommit b7545ca0687a1c42800d524740daeadd9cc6a1b7[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: MichaelG2992 <56423234+MichaelG2992@users.noreply.github.com>
+Date:   Tue May 12 13:32:21 2020 +1000
+
+    Initial commit
