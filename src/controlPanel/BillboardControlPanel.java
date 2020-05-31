@@ -4,10 +4,7 @@ import com.sun.tools.javac.Main;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import server.Billboard;
-import server.GeneralMessageResponse;
-import server.LoginReply;
-import server.LoginRequest;
+import server.*;
 
 import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
@@ -20,7 +17,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class BillboardControlPanel extends JFrame {
 
@@ -33,15 +33,10 @@ public class BillboardControlPanel extends JFrame {
     private static String messageText = "Welcome to the ____ Corporation's Annual Fundraiser!";
     private static String pictureUrl = "https://example.com/" +
             "fundraiser_image.jpg";
-    private static String pictureData = "iVBORw0KGgoAAA" +
-            "ANSUhEUgAAAAgAAAAICAIAAABLbSncAAAALHRFWHRDcm" +
-            "VhdGlvbiBUaW1lAE1vbiAxNiBNYXIgMjAyMCAxMDowNTo0N" +
-            "yArMTAwMNQXthkAAAAHdElNRQfkAxAABh+N6nQIAAAACXBIWX" +
-            "MAAAsSAAALEgHS3X78AAAABGdBTUEAALGPC/xhBQAAADVJREFUeNp" +
-            "1jkEKADAIwxr//+duIIhumJMUNUWSbU2AyPROFeVqaIH/T7JeRBd0D" +
-            "Y+8SrLVPbTmFQ1iRvw3AAAAAElFTkSuQmCC";
     private static String infoColour = "#00FFFF";
     private static String infoText = "Be sure to check out https://example.com/ for more information.";
+    private static Timer timer;
+    private static TimerTask timerTask;
 
 
     public static void setMessageColour(String color) {
@@ -60,6 +55,8 @@ public class BillboardControlPanel extends JFrame {
     private static String creator;
     private static String sessionToken;
     private static String permissions;
+
+
 
 
 
@@ -143,10 +140,7 @@ public class BillboardControlPanel extends JFrame {
 
                 //If Unsuccessful Message received from server due to invalid session
                 if (o instanceof GeneralMessageResponse) {
-                    GeneralMessageResponse generalMessageResponse = (GeneralMessageResponse) o;
-                    String responseMessage = generalMessageResponse.getMessage();
-                    JOptionPane.showMessageDialog(null, responseMessage,
-                            "Error", JOptionPane.OK_OPTION);
+                    showGeneralMessage(o);
                     exportSuccess = false;
 
                 } else {
@@ -169,48 +163,166 @@ public class BillboardControlPanel extends JFrame {
         return exportSuccess;
     }
 
-    /**
-     *
-     */
-        //Check for connection to server
-        public static boolean serverConnection() throws IOException {
-            boolean connection = false;
-            Properties networkProps = new Properties();
-            FileInputStream in = null;
 
+
+
+        public static ArrayList<Billboard> listBillboards() throws IOException, ClassNotFoundException {
             try {
-                in = new FileInputStream("./network.props");
-                networkProps.load((in));
-                in.close();
+                //Open Server connection
+                clientConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //Send ListBillboards request to server
+            ListBillboardsRequest listBillboardsRequest = new ListBillboardsRequest(sessionToken);
+            objectOutputStream.writeObject(listBillboardsRequest);
+            objectOutputStream.flush();
 
-                //Get data source from network properties
-                port = Integer.parseInt(networkProps.getProperty("port"));
-                host = networkProps.getProperty("host.name");
-
-                //Set up connection to server
-                socket = new Socket(host, port);
-                objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-                objectInputStream = new ObjectInputStream(socket.getInputStream());
-
-
-                //Display Server Connection
-                System.out.println(String.format("Client connected to host: %s at port: %d", host, port));
-                connection = true;
-
-            }// If no connection to server
-            catch (IOException | NumberFormatException e) {
-                return connection;
+            //Validate reply from server
+            Object o = objectInputStream.readObject();
+            ArrayList<Billboard> list = new ArrayList<Billboard>();
+            if (o instanceof ArrayList) {
+                //Parse reply object to ArrayList of Billboards
+                list = (ArrayList<Billboard>) o;
+            }
+            else{
+                showGeneralMessage(o);
             }
             objectOutputStream.close();
             objectInputStream.close();
             socket.close();
 
-            return connection;
+            return list;
 
         }
 
 
-        //Log in authentication
+
+    public static ArrayList<User> listUser() throws IOException, ClassNotFoundException {
+        try {
+            //Open server connection
+            clientConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Send ListUser request to server
+        UserRequest userRequest = new UserRequest(sessionToken);
+        objectOutputStream.writeObject(userRequest);
+        objectOutputStream.flush();
+
+        //Validate reply from server
+        Object o = objectInputStream.readObject();
+        ArrayList<User> list = new ArrayList<User>();
+        if (o instanceof ArrayList) {
+            //Parse reply object to ArrayList of Users
+            list = (ArrayList<User>) o;
+
+        }
+        else{
+            showGeneralMessage(o);
+        }
+
+        objectOutputStream.close();
+        objectInputStream.close();
+        socket.close();
+        return list;
+    }
+
+    public static ArrayList<ScheduleBillboard> listSchedules() throws IOException, ClassNotFoundException {
+        try {
+            //Open server connection
+            clientConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Send ListSchedules request to server
+        ListScheduleRequest scheduleRequest = new ListScheduleRequest();
+        objectOutputStream.writeObject(scheduleRequest);
+        objectOutputStream.flush();
+
+        //Validate reply from server
+        Object o = objectInputStream.readObject();
+        ArrayList<ScheduleBillboard> list = new ArrayList<ScheduleBillboard>();
+        list = (ArrayList<ScheduleBillboard>) o;
+
+        objectOutputStream.close();
+        objectInputStream.close();
+        socket.close();
+        return list;
+    }
+
+        public static void editPassword(String username, String password) throws IOException {
+            try {
+                //Get connection to server
+                clientConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //Send EditPassword request to server
+            EditPasswordRequest editPasswordRequest = new EditPasswordRequest(username,password,sessionToken);
+            objectOutputStream.writeObject(editPasswordRequest);
+            objectOutputStream.flush();
+
+            objectOutputStream.close();
+            objectInputStream.close();
+            socket.close();
+        }
+
+    public static void deleteUser(String username) throws IOException {
+        try {
+            //Get connection to server
+            clientConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Send EditPassword request to server
+        DeleteUserRequest deleteUserRequest = new DeleteUserRequest(username,sessionToken);
+        objectOutputStream.writeObject(deleteUserRequest);
+        objectOutputStream.flush();
+
+        objectOutputStream.close();
+        objectInputStream.close();
+        socket.close();
+    }
+
+    public static void deleteBillboard(String name) throws IOException {
+        try {
+            //Get connection to server
+            clientConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Send DeleteBillboard request to server
+        DeleteBillboardRequest deleteBillboardRequest = new DeleteBillboardRequest(name);
+        objectOutputStream.writeObject(deleteBillboardRequest);
+        objectOutputStream.flush();
+
+        objectOutputStream.close();
+        objectInputStream.close();
+        socket.close();
+
+    }
+
+    public static void createSchedule(ScheduleBillboard scheduleBillboard) throws IOException {
+        try {
+            //Get connection to server
+            clientConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Send a CreateSchedule request to server
+        objectOutputStream.writeObject(scheduleBillboard);
+        objectOutputStream.flush();
+
+        objectOutputStream.close();
+        objectInputStream.close();
+        socket.close();
+
+    }
+
+
+
+    //Log in authentication
         public static boolean logIn(String usernameText, String passwordText) {
             boolean loggedIn = false;
 
@@ -239,6 +351,19 @@ public class BillboardControlPanel extends JFrame {
                         sessionToken = loginReply.getSessionToken();
                         permissions = loginReply.getPermissions();
                         creator = loginReply.getUserName();
+
+                        //SetUp timer for expiration of sessionToken after 24hours
+                        timer = new Timer();
+                        TimerTask timerTask = new TimerTask() {
+                            @Override
+                            public void run() {
+                                //Clear previous session token
+                                sessionToken = "";;
+                            }
+                        };
+                        timer.schedule(timerTask,1000*60*60*24);
+
+
                         loggedIn = true;
                     } else {
                         loggedIn = false;
@@ -254,6 +379,15 @@ public class BillboardControlPanel extends JFrame {
             return loggedIn;
         }
 
+        public static void showGeneralMessage(Object o){
+            GeneralMessageResponse generalMessageResponse = (GeneralMessageResponse) o;
+            String responseMessage = generalMessageResponse.getMessage();
+            JOptionPane.showMessageDialog(null, responseMessage,
+                    "Error", JOptionPane.OK_OPTION);
+        }
+
+
+
         //Open new connection to server from client
         public static void clientConnection() throws IOException {
                 socket = new Socket(host,port);
@@ -261,6 +395,46 @@ public class BillboardControlPanel extends JFrame {
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
 
         }
+
+    /**
+     *
+     */
+    //Check for connection to server
+    public static boolean serverConnection() throws IOException {
+        boolean connection = false;
+        Properties networkProps = new Properties();
+        FileInputStream in = null;
+
+        try {
+            in = new FileInputStream("./network.props");
+            networkProps.load((in));
+            in.close();
+
+            //Get data source from network properties
+            port = Integer.parseInt(networkProps.getProperty("port"));
+            host = networkProps.getProperty("host.name");
+
+            //Set up connection to server
+            socket = new Socket(host, port);
+            objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+            objectInputStream = new ObjectInputStream(socket.getInputStream());
+
+
+            //Display Server Connection
+            System.out.println(String.format("Client connected to host: %s at port: %d", host, port));
+            connection = true;
+
+        }// If no connection to server
+        catch (IOException | NumberFormatException e) {
+            return connection;
+        }
+        objectOutputStream.close();
+        objectInputStream.close();
+        socket.close();
+
+        return connection;
+
+    }
 
 
 
@@ -273,6 +447,8 @@ public class BillboardControlPanel extends JFrame {
                     JFrame frame = new JFrame();
                     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                     MainMenuGUI mainMenu = new MainMenuGUI("Main Menu", frame);
+
+
                 }
             //Display Error message
             else{
