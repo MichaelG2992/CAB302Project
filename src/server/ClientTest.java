@@ -32,12 +32,12 @@ public class ClientTest {
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
 
             //TESTING REQUESTS
-            ListBillboardsRequest billboardRequest = new ListBillboardsRequest();
+            ListBillboardsRequest billboardRequest = new ListBillboardsRequest("1345");
             objectOutputStream.writeObject(billboardRequest);
             //LoginRequest loginRequest = new LoginRequest("superUser","password");
             //ListBillboardsRequest listBillboardsRequest = new ListBillboardsRequest();
             //erRequest userRequest = new UserRequest();
-           //ObjectOutputStream.writeObject(userRequest);
+           //bjectOutputStream.writeObject(userRequest);
             objectOutputStream.flush();
 
 
@@ -76,7 +76,6 @@ public class ClientTest {
                 ArrayList<User> list = (ArrayList<User>) o;
                    for (User user : list){
                         System.out.println("User Name:" + user.getUserName());
-                        //System.out.println("User Permissions:" + user.getPermissions());
 
                     }
 

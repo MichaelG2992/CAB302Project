@@ -31,7 +31,19 @@ public class MainMenuGUI extends JFrame implements ActionListener {
     private JPanel editBillboardsPanel;
     private JPanel cardLayout;
     private JButton exportButton;
+    private JButton exportLocallyButton;
     private JTextField messageText;
+    private JList scheduleList;
+    private JSpinner hourSpinner;
+    private JSpinner minuteSpinner;
+    private JSpinner durationSpinner;
+    private JPanel createSchedulePanel;
+    private JComboBox dayOfWeekCombo;
+    private JLabel dayOfWeekLabel;
+    private JButton createPermissionsButton;
+
+    private JLabel billboardName;
+    private JLabel billboardNameLabel;
     private JTextField infoText;
     private JButton messageColourButton;
     private JButton informationColourButton;
@@ -60,14 +72,24 @@ public class MainMenuGUI extends JFrame implements ActionListener {
     private JPanel mainMenuPanel;
     private JLabel welcomeLabel;
     private JLabel createBillboardLabel;
-    private JLabel scheduleBillboardsLabel;
+    private JLabel scheduleBillboardLabel;
     private JLabel editAllBillboardsLabel;
+    private JLabel editBillboardsLabel;
     private JLabel editUsersLabel;
+    private JLabel permissions;
+    private JLabel createPermissionLabel;
     private JPanel permissionsEditInfo;
+    private JLabel editUserLabel;
     private JButton confirmChangesToPermissionsButton;
     private JButton cancelPermissionsButton;
+    private JButton cancelPermissionButton;
+    private JButton deleteBillboardButton;
+    private JButton logOutButton;
     private JCheckBox editUsersCheckBox;
     private JCheckBox createBillboardsCheckBox;
+    private JButton editScheduleButton;
+    private JButton createScheduleButton;
+    private JButton sendScheduleToDatabaseButton;
     private JCheckBox scheduleBillboardsCheckBox;
     private JCheckBox editAllBillboardsCheckBox;
     private JButton createButton;
@@ -101,14 +123,14 @@ public class MainMenuGUI extends JFrame implements ActionListener {
         layout.show(cardLayout, "LoginScreen");
 
 
-         //Hide Main Menu Buttons
-         createNewBillboardButton.setVisible(false);
-         editBillboardsButton.setVisible(false);
-         scheduleBillboardsButton.setVisible(false);
-         editUsersButton.setVisible(false);
-         editBillboardsButton.setVisible(false);
-         editButton.setVisible(false);
-         createButton.setVisible(false);
+        //Hide Main Menu Buttons
+        createNewBillboardButton.setVisible(false);
+        editBillboardsButton.setVisible(false);
+        scheduleBillboardsButton.setVisible(false);
+        editUsersButton.setVisible(false);
+        editBillboardsButton.setVisible(false);
+        editButton.setVisible(false);
+        createButton.setVisible(false);
 
         ;
 
@@ -152,7 +174,6 @@ public class MainMenuGUI extends JFrame implements ActionListener {
         deleteUserButton.addActionListener(this::deleteUserActionPerformed);
         changePasswordButton.addActionListener(this::changePasswordActionPerformed);
         confirmChangesToPermissionsButton.addActionListener(this::confirmPermissionsActionPerformed);
-        cancelPermissionsButton.addActionListener(this::cancelPermissionsActionPerformed);
         createButton.addActionListener(this::createUserActionPerformed);
         previewBillboardButton.addActionListener(this::previewActionPerformed);
 
@@ -252,7 +273,7 @@ public class MainMenuGUI extends JFrame implements ActionListener {
 
 
         if(currentBillboard.getPictureUrl()!= null)
-           pictureButton.setText(currentBillboard.getPictureUrl());
+            pictureButton.setText(currentBillboard.getPictureUrl());
         else pictureButton.setText("Picture");
 
 
@@ -288,10 +309,10 @@ public class MainMenuGUI extends JFrame implements ActionListener {
 
         }
         if(selectedUser.getScheduleBillboards()){
-            scheduleBillboardsLabel.setVisible(true);
+            scheduleBillboardLabel.setVisible(true);
         }
         else{
-            scheduleBillboardsLabel.setVisible(false);
+            scheduleBillboardLabel.setVisible(false);
 
         }
         if(selectedUser.getEditAllBillboards()){
@@ -665,17 +686,17 @@ public class MainMenuGUI extends JFrame implements ActionListener {
         if (source instanceof JButton) {
             JButton button = (JButton) source;
             if(selectedUser != currentUser && currentUser.getEditUsers()){
-            // Delete from server as well
-            userList.remove(userList.indexOf(selectedUser));
-            selectedUser = null;
-            layout.show(cardLayout, "EditUsers");
-            removeActionListeners(editButton);
+                // Delete from server as well
+                userList.remove(userList.indexOf(selectedUser));
+                selectedUser = null;
+                layout.show(cardLayout, "EditUsers");
+                removeActionListeners(editButton);
 
-            editButton.addActionListener(this::editUserListActionPerformed);
+                editButton.addActionListener(this::editUserListActionPerformed);
 
-            editButton.setVisible(true);
-            createButton.setVisible(true);
-            this.pack();
+                editButton.setVisible(true);
+                createButton.setVisible(true);
+                this.pack();
             }
             else{
                 JOptionPane.showMessageDialog(this, INCORRECT_PERMISSIONS_TEXT,
@@ -715,24 +736,24 @@ public class MainMenuGUI extends JFrame implements ActionListener {
             JButton button = (JButton) source;
             currentBillboard = (Billboard) editBillboardList.getSelectedValue();
 
-                if(currentUser.getCreateBillboards() && currentUser.getUserName() == currentBillboard.getCreator()){
-                    /// AND if billboard is not scheduled yet
-                    layout.show(cardLayout, "BillboardCreator");
+            if(currentUser.getCreateBillboards() && currentUser.getUserName() == currentBillboard.getCreator()){
+                /// AND if billboard is not scheduled yet
+                layout.show(cardLayout, "BillboardCreator");
 
-                    refreshBillboard();
-                    removeActionListeners(editButton);
-                    editButton.setVisible(false);
-                    createButton.setVisible(false);
-                }
-                else{
+                refreshBillboard();
+                removeActionListeners(editButton);
+                editButton.setVisible(false);
+                createButton.setVisible(false);
+            }
+            else{
                 JOptionPane.showMessageDialog(this, INCORRECT_PERMISSIONS_TEXT,
                         "Error", JOptionPane.ERROR_MESSAGE);
-                }
-
-
             }
 
+
         }
+
+    }
 
     /**
      * Imports a correctly formatted XML file and goes to Create New with all
@@ -766,8 +787,8 @@ public class MainMenuGUI extends JFrame implements ActionListener {
             JButton button = (JButton) source;
 
             //Get username and password inputs
-             String  userName = usernameField.getText();
-             String password = passwordField.getText();
+            String  userName = usernameField.getText();
+            String password = passwordField.getText();
 
             //Log in authentication
             //Check for empty text fields
@@ -824,9 +845,9 @@ public class MainMenuGUI extends JFrame implements ActionListener {
             }
             else{
 
-                    JOptionPane.showMessageDialog(this, INCORRECT_PERMISSIONS_TEXT,
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                }
+                JOptionPane.showMessageDialog(this, INCORRECT_PERMISSIONS_TEXT,
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -923,7 +944,7 @@ public class MainMenuGUI extends JFrame implements ActionListener {
                             "Success", JOptionPane.INFORMATION_MESSAGE);
 
                 }
-                } catch (InstantiationException | ParserConfigurationException | IllegalAccessException |
+            } catch (InstantiationException | ParserConfigurationException | IllegalAccessException |
                     UnsupportedLookAndFeelException | TransformerException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
