@@ -19,6 +19,7 @@ public class NetworkProtocol  {
     private final int CREATE_SCHEDULE = 8;
     private final int LIST_SCHEDULES = 9;
     private final int CREATE_USER = 10;
+    private final int CHANGE_PERMISSIONS = 11;
     /**
      * @param protocol
      * @return
@@ -62,6 +63,9 @@ public class NetworkProtocol  {
         }
         else if (protocol instanceof CreateUser){
             return CREATE_USER;
+        }
+        else if (protocol instanceof ChangePermissions){
+            return  CHANGE_PERMISSIONS;
         }
         else{
             return -1;

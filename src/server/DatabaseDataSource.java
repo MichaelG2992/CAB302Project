@@ -22,6 +22,7 @@ public class DatabaseDataSource {
             "CREATE TABLE IF NOT EXISTS billboards ( "
                     + "name VARCHAR(255) PRIMARY KEY NOT NULL UNIQUE,"
                     + "creator VARCHAR(255) NOT NULL,"
+                    + "xmlString VARCHAR(255),"
                     + "file BLOB" + ");";
     public static final String CREATE_TABLE3 =
             "CREATE TABLE IF NOT EXISTS scheduling ( "
@@ -70,10 +71,15 @@ public class DatabaseDataSource {
         String insertPermissions = "UPDATE USERS SET permissions = ? WHERE username = 'superUser'";
         PreparedStatement preparedStatement = connection.prepareStatement(insertPermissions);
 
-
-
-
-
+        //Serialize billboard object
+        byte [] data = new byte[0];
+        try {
+            data = objectToByte(superUser);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        preparedStatement.setBytes(1,data);
+        preparedStatement.executeUpdate();
 
         statement.close();
         // connection.close();
@@ -92,7 +98,7 @@ public class DatabaseDataSource {
         while (resultSet.next()){
 
             //De-serialize Billboard
-            byte [] o = resultSet.getBytes(3);
+            byte [] o = resultSet.getBytes(4);
             Billboard billboard = byteToObject(o);
 
             //Add Billboard to list
@@ -162,6 +168,35 @@ public class DatabaseDataSource {
         statement.close();
     }
 
+    public void changePermissions(ChangePermissions changePermissions) throws SQLException {
+        Connection connection = DBConnection.getInstance();
+        String insertPermissions = "UPDATE USERS SET permissions = ? WHERE username = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(insertPermissions);
+
+        System.out.println(changePermissions.getUsername() + changePermissions.getEditAllBillboards()+changePermissions.getCreateBillboards());
+
+        User user = new User();
+        //Set permissions for user
+        user.setCreateBillboards(changePermissions.getCreateBillboards());
+        user.setEditAllBillboards(changePermissions.getEditAllBillboards());
+        user.setScheduleBillboards(changePermissions.getScheduleBillboards());
+        user.setEditUsers(changePermissions.getEditUsers());
+
+        //Serialize billboard object
+        byte [] data = new byte[0];
+        try {
+            data = objectToByte(user);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        preparedStatement.setBytes(1,data);
+        preparedStatement.setString(2,changePermissions.getUsername());
+        preparedStatement.executeUpdate();
+
+        preparedStatement.close();
+        // connection.close();
+    }
+
     public void createUser(CreateUser user) throws SQLException {
         Connection connection = DBConnection.getInstance();
         final String CREATE_USER = "INSERT INTO USERS(username,password) VALUES(?,?)";
@@ -203,14 +238,36 @@ public class DatabaseDataSource {
     public ArrayList<User> getUsers() throws SQLException {
         Connection connection = DBConnection.getInstance();
         Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(("SELECT * FROM users"));
+        ResultSet resultSet = statement.executeQuery(("SELECT username,permissions FROM users"));
         ArrayList<User> userList = new ArrayList<User>();
 
         while (resultSet.next()) {
-            String userName = (resultSet.getString(2));
-            String permissions = ((resultSet.getString(4)));
             User user = new User();
+
+            String userName = (resultSet.getString(1));
             user.setUsername(userName);
+
+            //De-serialize User permission
+            byte[] o = resultSet.getBytes(2);
+            if (o != null) {
+
+
+                try {
+                    Object object = byteToObjectUser(o);
+                    User userPermissions = (User) object;
+                    //Set permissions for logged in user
+                    user.setCreateBillboards(userPermissions.getCreateBillboards());
+                    user.setEditAllBillboards(userPermissions.getEditAllBillboards());
+                    user.setScheduleBillboards(userPermissions.getScheduleBillboards());
+                    user.setEditUsers(userPermissions.getEditUsers());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
             userList.add(user);
         }
             resultSet.close();
@@ -352,7 +409,7 @@ public class DatabaseDataSource {
         if (resultSet.next() != false) {
             //Retrieve password and permissions from set
             String storedPassword = resultSet.getString(1);
-            String permissions = resultSet.getString(2);
+
 
             //Cross validate request password with database password
             if (storedPassword.equals(request.getPassword())) {
@@ -362,14 +419,33 @@ public class DatabaseDataSource {
                 String sessionToken = loginReply.createSessionToken();
                 loginReply.setUserName(request.getUserName());
                 loginReply.setSessionToken(sessionToken);
-                loginReply.setPermissions(permissions);
 
-            } // Incorrect password
+                //De-serialize User permission
+                byte[] o = resultSet.getBytes(2);
+                try {
+                    Object object = byteToObjectUser(o);
+                    User user = (User) object;
+                    //Set permissions for logged in user
+                    loginReply.setCreateBillboards(user.getCreateBillboards());
+                    loginReply.setEditAllBillboards(user.getEditAllBillboards());
+                    loginReply.setScheduleBillboards(user.getScheduleBillboards());
+                    loginReply.setEditUsers(user.getEditUsers());
+
+
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Incorrect password
             else {
                 loginReply.setLoginSuccessful(false);
             }
-
         }
+
         //Empty set retrieved from database
         else{
             loginReply.setLoginSuccessful(false);
@@ -434,10 +510,24 @@ public class DatabaseDataSource {
         return billboard;
 
 
+    }
 
+    //Implementation used from http://www.easywayserver.com/java/save-serializable-object-in-java/
+    private  User byteToObjectUser(byte [] bytes ) throws IOException, ClassNotFoundException {
+        //Convert bytes to Billboard object
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+        ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+
+        Object o = objectInputStream.readObject();
+        User user = (User) o;
+        objectInputStream.close();
+        byteArrayInputStream.close();
+
+        return user;
 
 
 
     }
+
 
 }

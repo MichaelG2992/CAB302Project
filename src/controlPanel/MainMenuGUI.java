@@ -2,10 +2,7 @@ package controlPanel;
 
 import com.sun.tools.javac.Main;
 import org.xml.sax.SAXException;
-import server.Billboard;
-import server.CreateUser;
-import server.ScheduleBillboard;
-import server.User;
+import server.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -142,6 +139,7 @@ public class MainMenuGUI extends JFrame implements ActionListener {
          sendScheduleToDatabaseButton.setVisible(false);
          editScheduleButton.setVisible(false);
         createButton.setVisible(false);
+
         ;
 
         // On start up, same session
@@ -576,6 +574,16 @@ public class MainMenuGUI extends JFrame implements ActionListener {
         selectedUser.setEditAllBillboards(editAllBillboardsCheckBox.isSelected());
         selectedUser.setCreateBillboards(createBillboardsCheckBox.isSelected());
         selectedUser.setScheduleBillboards(scheduleBillboardsCheckBox.isSelected());
+
+        ChangePermissions changePermissions = new ChangePermissions(selectedUser.getUserName(),selectedUser.getCreateBillboards(),
+                selectedUser.getEditAllBillboards(),selectedUser.getScheduleBillboards(),selectedUser.getEditUsers());
+        try {
+            BillboardControlPanel.setPermissions(changePermissions);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     /**
@@ -618,12 +626,13 @@ public class MainMenuGUI extends JFrame implements ActionListener {
         CreateUser createUser = new CreateUser();
         createUser.setUsername(selectedUser.getUserName());
         createUser.setPassword(selectedUser.getPassword());
+
         try {
             BillboardControlPanel.createUser(createUser);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        setupEditPermission(frame);
+
 
 
     }
@@ -741,6 +750,8 @@ public class MainMenuGUI extends JFrame implements ActionListener {
             e.printStackTrace();
         }
 
+        JOptionPane.showMessageDialog(this,"Sent Schedule to Database",
+                "Success",JOptionPane.PLAIN_MESSAGE);
 
     }
 
@@ -781,7 +792,6 @@ public class MainMenuGUI extends JFrame implements ActionListener {
 
         }
     }
-
 
 
 
@@ -1260,6 +1270,7 @@ public class MainMenuGUI extends JFrame implements ActionListener {
             e.printStackTrace();
         }
         MainMenuGUI mainMenu = new MainMenuGUI("Main Menu", frame);
+        setCurrentUser(currentUser);
 
     }
 }

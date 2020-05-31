@@ -54,7 +54,8 @@ public class BillboardControlPanel extends JFrame {
     //Current User Properties
     private static String creator;
     private static String sessionToken;
-    private static String permissions;
+    private static String permissions = null;
+    private static User currentUser =null;
 
 
 
@@ -64,8 +65,6 @@ public class BillboardControlPanel extends JFrame {
 
         boolean exportSuccess = false;
 
-        //Check for appropriate permissions
-        if (permissions.contains("Create Billboards")) {
 
             DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 
@@ -130,6 +129,8 @@ public class BillboardControlPanel extends JFrame {
                 billboard.setSessionToken(sessionToken);
                 //Set Creator to billboard
                 billboard.setCreator(creator);
+
+                billboard.setXmlString(file);
                 //Establish  Connection
                 clientConnection();
                 objectOutputStream.writeObject(billboard);
@@ -155,11 +156,7 @@ public class BillboardControlPanel extends JFrame {
             }
 
 
-        }//Invalid permissions to create billboard
-        else {
-            JOptionPane.showMessageDialog(null, "You do not have the required permission: CREATE BILLBOARDS",
-                    "Error", JOptionPane.OK_OPTION);
-        }
+
         return exportSuccess;
     }
 
@@ -270,6 +267,27 @@ public class BillboardControlPanel extends JFrame {
         socket.close();
     }
 
+    public static void setPermissions(ChangePermissions permissions) throws IOException {
+        try {
+            //Get connection to server
+            clientConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        //Send Permissions request
+        objectOutputStream.writeObject(permissions);
+        objectOutputStream.flush();
+
+        JOptionPane.showMessageDialog(null, "Changed Permissions of  User",
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+
+        objectOutputStream.close();
+        objectInputStream.close();
+        socket.close();
+    }
+
     public static void createUser(CreateUser user) throws IOException {
         try {
             //Get connection to server
@@ -367,11 +385,17 @@ public class BillboardControlPanel extends JFrame {
                     //If log in successful
                     //Set current session token and permissions
                     if (loginReply.getLoginSuccessful()) {
-                        System.out.println(String.format("Logged in as: %s with Session token %s and permissions: %s", loginReply.getUserName(),
-                                loginReply.getSessionToken(), loginReply.getPermissions()));
+                        System.out.println(String.format("Logged in as: %s with Session token %s", loginReply.getUserName(),loginReply.getSessionToken()));
                         sessionToken = loginReply.getSessionToken();
-                        permissions = loginReply.getPermissions();
                         creator = loginReply.getUserName();
+
+                        User currentUser = new User();
+                        //Set up Permissions for current user
+                        currentUser.setCreateBillboards(loginReply.getCreateBillboards());
+                        currentUser.setScheduleBillboards(loginReply.getScheduleBillboards());
+                        currentUser.setEditUsers(loginReply.getEditUsers());
+                        currentUser.setEditAllBillboards(loginReply.getEditAllBillboards());
+
 
                         //SetUp timer for expiration of sessionToken after 24hours
                         timer = new Timer();
@@ -467,11 +491,7 @@ public class BillboardControlPanel extends JFrame {
                     JFrame frame = new JFrame();
                     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                     MainMenuGUI mainMenu = new MainMenuGUI("Main Menu", frame);
-
-                // For testing or if database is empty
-                User superUser = new User("SuperUser", true,
-                        true, true, true);
-                mainMenu.setCurrentUser(superUser);
+                    mainMenu.setCurrentUser(currentUser);
 
 
                 }

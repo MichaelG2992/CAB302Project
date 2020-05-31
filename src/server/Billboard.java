@@ -29,6 +29,7 @@ public class Billboard implements Serializable{
     private String infoText;
     private String creator;
     private String sessionToken;
+    private String xmlString;
 
 
     // Should be editable in GUI
@@ -94,6 +95,8 @@ public class Billboard implements Serializable{
         this.sessionToken = sessionToken;
     }
 
+    public void setXmlString(String xmlString){this.xmlString = xmlString;}
+
 
     //Getters
     public String getName() {
@@ -132,63 +135,67 @@ public class Billboard implements Serializable{
         return sessionToken;
     }
 
+    public String getXmlString() {return xmlString;}
 
 
-    public static Billboard importXML(String importFile) throws ParserConfigurationException, IOException, SAXException {
-        File file = new File(importFile);
-        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 
-        DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
-        Document document = documentBuilder.parse(importFile);
+    public static Billboard importXML(String importFile) throws ParserConfigurationException, IOException, SAXException { {
+            File file = new File(importFile);
+            DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 
-        Billboard importedBillboard = new Billboard();
+            DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+            Document document = documentBuilder.parse(importFile);
 
-        // Get values from XML
-        String name = importFile.substring(importFile.lastIndexOf('\\') + 1);
-        name = name.substring(0, name.length() - 4);
-        importedBillboard.setName(name);
-        // Get background colour
-        NodeList billboardNodes = document.getElementsByTagName("billboard");
-        Node billboard = billboardNodes.item(0);
-        NamedNodeMap billboardBackground = billboard.getAttributes();
-        if(billboardBackground != null){
-            importedBillboard.setBackgroundColour(billboardBackground.getNamedItem("background").getTextContent());
-        }
+            Billboard importedBillboard = new Billboard();
 
-        // Get message text and colour
-        NodeList nodelistMessage = document.getElementsByTagName("message");
-        Node message = nodelistMessage.item(0);
-        NamedNodeMap messageColour= message.getAttributes();
-        if(message != null){
-            importedBillboard.setMessageText(document.getElementsByTagName("message").item(0).getTextContent());
-            if(messageColour != null ){
-                importedBillboard.setMessageColour(messageColour.getNamedItem("colour").getTextContent());
+            // Get values from XML
+            String name = importFile.substring(importFile.lastIndexOf('\\') + 1);
+            name = name.substring(0, name.length() - 4);
+            importedBillboard.setName(name);
+            // Get background colour
+            NodeList billboardNodes = document.getElementsByTagName("billboard");
+            Node billboard = billboardNodes.item(0);
+            NamedNodeMap billboardBackground = billboard.getAttributes();
+            if(billboardBackground != null){
+                importedBillboard.setBackgroundColour(billboardBackground.getNamedItem("background").getTextContent());
             }
-        }
 
-        // Get picture URL
-        NodeList nodelistPicture = document.getElementsByTagName("picture");
-        Node picture = nodelistPicture.item(0);
-        //importedBillboard.setPictureUrl(document.getElementsByTagName("picture").item(0).getTextContent());
-        NamedNodeMap pictureURL = picture.getAttributes();
-        if(picture != null){
-            if(pictureURL != null ){
-                importedBillboard.setPictureUrl(pictureURL.getNamedItem("url").getTextContent());
+            // Get message text and colour
+            NodeList nodelistMessage = document.getElementsByTagName("message");
+            Node message = nodelistMessage.item(0);
+            NamedNodeMap messageColour= message.getAttributes();
+            if(message != null){
+                importedBillboard.setMessageText(document.getElementsByTagName("message").item(0).getTextContent());
+                if(messageColour != null ){
+                    importedBillboard.setMessageColour(messageColour.getNamedItem("colour").getTextContent());
+                }
             }
-        }
 
-        // Get info text and colour
-        NodeList nodelistInfo = document.getElementsByTagName("information");
-        Node information = nodelistInfo.item(0);
-        NamedNodeMap infoColour = information.getAttributes();
-        if(information != null){
-            importedBillboard.setInfoText(document.getElementsByTagName("information").item(0).getTextContent());
-            if(infoColour != null){
-                importedBillboard.setInfoColour(infoColour.getNamedItem("colour").getTextContent());
+            // Get picture URL
+            NodeList nodelistPicture = document.getElementsByTagName("picture");
+            Node picture = nodelistPicture.item(0);
+            //importedBillboard.setPictureUrl(document.getElementsByTagName("picture").item(0).getTextContent());
+            NamedNodeMap pictureURL = picture.getAttributes();
+            if(picture != null){
+                if(pictureURL != null ){
+                    importedBillboard.setPictureUrl(pictureURL.getNamedItem("url").getTextContent());
+                }
             }
+
+            // Get info text and colour
+            NodeList nodelistInfo = document.getElementsByTagName("information");
+            Node information = nodelistInfo.item(0);
+            NamedNodeMap infoColour = information.getAttributes();
+            if(information != null){
+                importedBillboard.setInfoText(document.getElementsByTagName("information").item(0).getTextContent());
+                if(infoColour != null){
+                    importedBillboard.setInfoColour(infoColour.getNamedItem("colour").getTextContent());
+                }
+            }
+
+            return importedBillboard;
         }
 
-        return importedBillboard;
     }
 
     public void exportXML()

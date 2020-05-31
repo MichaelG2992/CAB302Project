@@ -191,6 +191,14 @@ public class Server {
                         createUserData.createUser(createUser);
                         break;
 
+                    case 11:
+                        DatabaseDataSource changePermissionsData = new DatabaseDataSource();
+                        ChangePermissions changePermissions = (ChangePermissions) o;
+                        changePermissionsData.changePermissions(changePermissions);
+                        break;
+
+
+
                     default:
                         objectOutputStream.writeObject(null);
 

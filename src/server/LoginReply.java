@@ -9,7 +9,10 @@ public class LoginReply implements Serializable {
     private String userName;
     private boolean loginSuccessful = false;
     private String sessionToken;
-    private String permissions;
+    private boolean createBillboards,
+            editAllBillboards,
+            scheduleBillboards,
+            editUsers;
 
     public LoginReply()  {
     }
@@ -36,13 +39,21 @@ public class LoginReply implements Serializable {
         return userName;
     }
 
-    public void setPermissions(String permissions) {
-        this.permissions = permissions;
-    }
 
-    public String getPermissions() {
-        return permissions;
-    }
+    public void setCreateBillboards(boolean value){createBillboards = value;}
+    public boolean getCreateBillboards(){return createBillboards;}
+
+    public void setEditAllBillboards(boolean value){editAllBillboards = value;}
+    public boolean getEditAllBillboards(){return editAllBillboards;}
+
+    public void setScheduleBillboards(boolean value){scheduleBillboards = value;}
+    public boolean getScheduleBillboards(){return scheduleBillboards;}
+
+    public void setEditUsers(boolean value){editUsers = value;}
+    public boolean getEditUsers(){return editUsers;}
+
+
+
 
     /**
      * @return
