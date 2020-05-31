@@ -1,4 +1,6 @@
 package server;
 
-public class CreateScheduleRequest {
+import java.io.Serializable;
+
+public class CreateScheduleRequest implements Serializable {
 }

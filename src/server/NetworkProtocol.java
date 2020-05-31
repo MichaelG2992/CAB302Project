@@ -13,8 +13,12 @@ public class NetworkProtocol  {
     private final int CREATE_BILLBOARD = 2;
     private final int LIST_BILLBOARDS = 3;
     private final int LIST_USERS = 4;
-
-
+    private final int EDIT_PASSWORD = 5;
+    private final int DELETE_USERS = 6;
+    private final int DELETE_BILLBOARD = 7;
+    private final int CREATE_SCHEDULE = 8;
+    private final int LIST_SCHEDULES = 9;
+    private final int CREATE_USER = 10;
     /**
      * @param protocol
      * @return
@@ -38,10 +42,26 @@ public class NetworkProtocol  {
         else if (protocol instanceof Billboard) {
             return CREATE_BILLBOARD;
         }
-
         else if (protocol instanceof UserRequest){
-                return LIST_USERS;
-
+            return LIST_USERS;
+        }
+        else if (protocol instanceof EditPasswordRequest){
+            return EDIT_PASSWORD;
+        }
+        else if (protocol instanceof DeleteUserRequest){
+            return DELETE_USERS;
+        }
+        else if ( protocol instanceof DeleteBillboardRequest){
+            return DELETE_BILLBOARD;
+        }
+        else if ( protocol instanceof ScheduleBillboard){
+            return CREATE_SCHEDULE;
+        }
+        else if ( protocol instanceof  ListScheduleRequest){
+            return LIST_SCHEDULES;
+        }
+        else if (protocol instanceof CreateUser){
+            return CREATE_USER;
         }
         else{
             return -1;

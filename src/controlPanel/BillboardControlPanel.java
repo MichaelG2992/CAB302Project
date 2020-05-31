@@ -251,22 +251,43 @@ public class BillboardControlPanel extends JFrame {
         return list;
     }
 
-        public static void editPassword(String username, String password) throws IOException {
-            try {
-                //Get connection to server
-                clientConnection();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            //Send EditPassword request to server
-            EditPasswordRequest editPasswordRequest = new EditPasswordRequest(username,password,sessionToken);
-            objectOutputStream.writeObject(editPasswordRequest);
-            objectOutputStream.flush();
 
-            objectOutputStream.close();
-            objectInputStream.close();
-            socket.close();
+
+        public static void editPassword(String username, String password) throws IOException {
+        try {
+            //Get connection to server
+            clientConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        //Send EditPassword request to server
+        EditPasswordRequest editPasswordRequest = new EditPasswordRequest(username,password,sessionToken);
+        objectOutputStream.writeObject(editPasswordRequest);
+        objectOutputStream.flush();
+
+        objectOutputStream.close();
+        objectInputStream.close();
+        socket.close();
+    }
+
+    public static void createUser(CreateUser user) throws IOException {
+        try {
+            //Get connection to server
+            clientConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Send EditPassword request to server
+        objectOutputStream.writeObject(user);
+        objectOutputStream.flush();
+
+        JOptionPane.showMessageDialog(null, "Created User",
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+
+        objectOutputStream.close();
+        objectInputStream.close();
+        socket.close();
+    }
 
     public static void deleteUser(String username) throws IOException {
         try {
@@ -437,7 +458,6 @@ public class BillboardControlPanel extends JFrame {
     }
 
 
-
         public static void main(String argv[]) throws ClassNotFoundException,
                 UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException, IOException {
             //LayoutCards.createAndShowGUI();
@@ -447,6 +467,11 @@ public class BillboardControlPanel extends JFrame {
                     JFrame frame = new JFrame();
                     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                     MainMenuGUI mainMenu = new MainMenuGUI("Main Menu", frame);
+
+                // For testing or if database is empty
+                User superUser = new User("SuperUser", true,
+                        true, true, true);
+                mainMenu.setCurrentUser(superUser);
 
 
                 }

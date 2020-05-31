@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
@@ -102,14 +103,12 @@ public class Server {
                         Billboard billboard = (Billboard) o;
 
                         //Check for valid sessiontoken
-                        System.out.println(billboard.getSessionToken());
                         if (users.containsValue(billboard.getSessionToken())) {
                             //Create billboard and add to database
                             DatabaseDataSource createData = new DatabaseDataSource();
                             createData.createBillboard(billboard);
                             System.out.println(String.format("Added Name: %s to the database", billboard.getName()));
                         } else {
-                            System.out.println("SENT MESSAGE");
                             GeneralMessageResponse generalMessageResponse = new GeneralMessageResponse("Not a vaild Session Token. Please Log In to continue.");
                             objectOutputStream.writeObject(generalMessageResponse);
 
@@ -120,18 +119,77 @@ public class Server {
                     //List Billboards Request
                     case 3:
                         ListBillboardsRequest listBillboardsRequest = (ListBillboardsRequest) o;
-                        DatabaseDataSource listData = new DatabaseDataSource();
-                        ArrayList<Billboard> listBillboards = listData.getBillboards();
-                        objectOutputStream.writeObject(listBillboards);
+                        if (users.containsValue(listBillboardsRequest.getSessionToken())){
+                            DatabaseDataSource listData = new DatabaseDataSource();
+                            ArrayList<Billboard> listBillboards = listData.getBillboards();
+                            objectOutputStream.writeObject(listBillboards);
+
+                        }else {
+                            GeneralMessageResponse generalMessageResponse = new GeneralMessageResponse("Not a vaild Session Token. Please Log In to continue.");
+                            objectOutputStream.writeObject(generalMessageResponse);
+
+                        }
                         break;
 
                         //List Users Request
                     case 4:
                         UserRequest userRequest = (UserRequest) o;
-                        DatabaseDataSource userData = new DatabaseDataSource();
-                        ArrayList<User> listUsers = userData.getUsers();
-                        objectOutputStream.writeObject(listUsers);
+                        if (users.containsValue(userRequest.getSessionToken())){
+                            DatabaseDataSource userData = new DatabaseDataSource();
+                            ArrayList<User> listUsers = userData.getUsers();
+                            objectOutputStream.writeObject(listUsers);
+                        }
+                        else {
+                            GeneralMessageResponse generalMessageResponse = new GeneralMessageResponse("Not a vaild Session Token. Please Log In to continue.");
+                            objectOutputStream.writeObject(generalMessageResponse);
+                        }
+                        break;
 
+                        //Edit Password Request
+                    case 5:
+                        EditPasswordRequest editPasswordRequest = (EditPasswordRequest) o;
+                        DatabaseDataSource passwordData = new DatabaseDataSource();
+                        passwordData.editPassword(editPasswordRequest.getUsername(),editPasswordRequest.getPassword());
+                        System.out.println("CHANGED PASSWORD to" + editPasswordRequest.getPassword());
+                        break;
+
+                        //Delete User Request
+                    case 6:
+                        DeleteUserRequest deleteUserRequest = (DeleteUserRequest) o;
+                        DatabaseDataSource deleteUserData = new DatabaseDataSource();
+                        deleteUserData.deleteUser(deleteUserRequest.getUsername());
+                        System.out.println("DELETED USER" + deleteUserRequest.getUsername());
+                        break;
+
+
+                        //Delete Billboard Request
+                    case 7:
+                        DeleteBillboardRequest deleteBillboardRequest = (DeleteBillboardRequest) o;
+                        DatabaseDataSource deleteBillboardData = new DatabaseDataSource();
+                        deleteBillboardData.deleteBillboard(deleteBillboardRequest.getName());
+                        System.out.println("DELETED BILLBOARD" + deleteBillboardRequest.getName());
+                        break;
+
+                        //Create Billboard Schedule Request
+                    case 8:
+                        ScheduleBillboard scheduleBillboard = (ScheduleBillboard) o;
+                        DatabaseDataSource scheduleBillboardData = new DatabaseDataSource();
+                        scheduleBillboardData.scheduleBillboard(scheduleBillboard);
+                        break;
+
+                        //List Schedules Request
+                    case 9 :
+                        DatabaseDataSource listScheduleData = new DatabaseDataSource();
+                        ArrayList<ScheduleBillboard> scheduleList = listScheduleData.getSchedules();
+                        objectOutputStream.writeObject(scheduleList);
+                        break;
+
+                        //Create User Request
+                    case 10:
+                        DatabaseDataSource createUserData = new DatabaseDataSource();
+                        CreateUser createUser = (CreateUser) o;
+                        createUserData.createUser(createUser);
+                        break;
 
                     default:
                         objectOutputStream.writeObject(null);
@@ -140,9 +198,11 @@ public class Server {
             }// If no connection to server
             catch (IOException e) {
                 continue;
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
 
-                objectInputStream.close();
+            objectInputStream.close();
                 objectOutputStream.flush();
                 objectOutputStream.close();
                 socket.close();

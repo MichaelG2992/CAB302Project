@@ -6,14 +6,24 @@ public class User  implements Serializable {
 
     private String username;
     private String password;
-    private String permissions;
-
+    private boolean createBillboards,
+                    editAllBillboards,
+                    scheduleBillboards,
+                    editUsers;
     public User(){
     }
 
-    public User(String name, String level){
+    public User(String username){
+        this.username = username;
+    }
+
+    public User(String name, boolean createBillboards, boolean editAllBillboards, boolean scheduleBillboards,
+                boolean editUsers){
         username = name;
-        permissions = level;
+        this.createBillboards = createBillboards;
+        this.editAllBillboards = editAllBillboards;
+        this.scheduleBillboards = scheduleBillboards;
+        this.editUsers = editUsers;
     }
 
 
@@ -32,12 +42,19 @@ public class User  implements Serializable {
         this.password = password;
     }
 
-    public String getPermissions() {
-        return permissions;
-    }
+    public void setCreateBillboards(boolean value){createBillboards = value;}
+    public boolean getCreateBillboards(){return createBillboards;}
 
-    public void setPermissions(String permissions) {
-        this.permissions = permissions;
-    }
+    public void setEditAllBillboards(boolean value){editAllBillboards = value;}
+    public boolean getEditAllBillboards(){return editAllBillboards;}
+
+    public void setScheduleBillboards(boolean value){scheduleBillboards = value;}
+    public boolean getScheduleBillboards(){return scheduleBillboards;}
+
+    public void setEditUsers(boolean value){editUsers = value;}
+    public boolean getEditUsers(){return editUsers;}
+
+    public String toString(){return username;}
+
 }
 

@@ -103,7 +103,6 @@ public class Billboard implements Serializable{
     public String getInfoText() {
         return infoText;
     }
-    public String getXmlFilePath(){return xmlFilePath;}
 
     public String getMessageText() {
         return messageText;
@@ -238,17 +237,18 @@ public class Billboard implements Serializable{
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource domSource = new DOMSource(document);
-        StreamResult streamResult = new StreamResult(new File(xmlFilePath + ".xml"));
+        StreamResult streamResult = new StreamResult(new File(xmlFilePath + "\\\\"+ this.name + ".xml"));
 
         // For Debugging
         // StreamResult streamResult = new StreamResult(System.out);
         transformer.transform(domSource, streamResult);
+
 
         System.out.println("Done creating XML File");
     }
 
     @Override
     public String toString() {
-        return this.name + "                    Creator: " + this.creator;
+        return "NAME:  " + this.name +    "                          CREATOR: " + this.creator;
     }
 }

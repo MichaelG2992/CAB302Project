@@ -2,18 +2,18 @@ package server;
 
 import java.io.Serializable;
 
-public class DeleteUserRequest implements Serializable {
+public class DeleteBillboardRequest implements Serializable {
 
 
-    private String username;
+    private String name;
 
 
-    public DeleteUserRequest(String username) {
-        this.username = username;
+    public DeleteBillboardRequest(String name) {
+        this.name = name;
     }
 
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 }
